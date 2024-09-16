@@ -1,55 +1,63 @@
 import sys
-
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QMessageBox, QDesktopWidget
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTextEdit
+from PyQt5.QtGui import QPainter, QColor, QBrush
 
 
-class Example(QWidget):
-
+class SecondWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Второе окно")
+        self.setGeometry(100, 100, 400, 300)
 
-        self.initUI()
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        brush = QBrush(QColor(255, 255, 255))
+        painter.setBrush(brush)
 
+        layout = QVBoxLayout()
 
-    def initUI(self):
-        QToolTip.setFont(QFont('SansSerif', 10))
-        self.setToolTip('This is a <b>QWidget</b> widget')
-        btn = QPushButton('Button', self)
-        btn.setToolTip('This is a <b>QPushButton</b> widget')
-        btn.resize(btn.sizeHint())
-        btn.move(50, 50)
-
-        qbtn = QPushButton('Quit', self)
-        qbtn.clicked.connect(QCoreApplication.instance().quit)
-        qbtn.resize(qbtn.sizeHint())
-
-        self.setGeometry(300, 300, 300, 220)
-        self.setWindowTitle('SilinApp')
-        self.setWindowIcon(QIcon('bin.png'))
-
-        self.show()
-
-    def closeEvent(self, event):
-
-        reply = QMessageBox.question(self, 'Message', "Are you sure to quit?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
-
-    def center(self):
-
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
 
 
-if __name__ == '__main__':
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Основное окно")
+        self.setGeometry(100, 100, 400, 300)
 
+        button = QPushButton("Открыть второе окно")
+        button.resize(50, 50)
+        button.clicked.connect(self.openSecondWindow)
+
+        self.textEdit = QTextEdit(self)
+        self.label = QLabel("Текст", self)
+
+        changeLabelButton = QPushButton('Изменить Заголовок')
+        changeLabelButton.clicked.connect(self.changeLabelText)
+
+        layout = QVBoxLayout()
+        layout.addWidget(button)
+        layout.addWidget(self.label)
+        layout.addWidget(changeLabelButton)
+        layout.addWidget(self.textEdit)
+
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
+
+    def openSecondWindow(self):
+        self.second_window = SecondWindow()
+        self.second_window.show()
+
+    def changeLabelText(self):
+        text = self.textEdit.toPlainText()
+        self.label.setText(text)
+
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = Example()
+    main_window = MainWindow()
+    main_window.show()
     sys.exit(app.exec_())
